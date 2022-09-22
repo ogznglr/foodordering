@@ -1,0 +1,35 @@
+{{define "restregister"}}
+<div class="row justify-content-center">
+    <div class="col-xl-10 col-lg-12 col-md-9">
+        <div class="p-5">
+            <div class="text-center">
+                <h1 class="h4 text-gray-900 mb-4">Create a Restaurant Account</h1>
+            </div>
+            <form class="user" action="/newrestaurant" method="post">
+                <div class="form-group">
+                        <input name="firstname" type="text" class="form-control form-control-user" id="exampleFirstName"
+                            placeholder="Restaurant Name">
+                </div>
+                <div class="form-group">
+                    <input name="email" type="email" class="form-control form-control-user" id="exampleInputEmail"
+                        placeholder="Email Address">
+                </div>
+                <div class="form-group">
+                        <input name="password" type="password" class="form-control form-control-user"
+                            id="exampleInputPassword" placeholder="Password">
+                </div>
+                <button type="submit" class="btn btn-primary btn-user btn-block">
+                    Register Restaurant Account
+                </button>
+            </form>
+            <hr>
+            <div class="text-center">
+                <a class="small" href="forgot-password.html">Forgot Password?</a>
+            </div>
+            <div class="text-center">
+                <a class="small" href="login.html">Already have an account? Login!</a>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
