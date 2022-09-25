@@ -8,7 +8,7 @@ import (
 var DB *gorm.DB
 
 func Connection() {
-	str := "root:password@tcp(db:3306)/foodorder?charset=utf8mb4&parseTime=True&loc=Local"
+	str := "root:@tcp(localhost:3306)/foodorder?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(str), &gorm.Config{})
 	if err != nil {
 		panic("Couldn't connect to the database")

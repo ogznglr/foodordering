@@ -30,23 +30,7 @@ type ProductDetailPage struct {
 
 func (MainPage) Index(c *fiber.Ctx) error {
 
-	s := session.New()
-	issuer, err := s.Get(c, secretKey)
-
-	if err != nil {
-		alert := session.GetFlash(c)
-		return c.Render("mainpage", fiber.Map{
-			"alert": alert,
-		})
-	}
-
-	uid, err := strconv.Atoi(issuer)
-	if err != nil {
-		return err
-	}
-
-	user, err := models.User{}.First(uid)
-
+	user, err := helpers.UserValidation(c, secretKey)
 	if err != nil {
 		alert := session.GetFlash(c)
 		return c.Render("mainpage", fiber.Map{
@@ -132,26 +116,15 @@ func (RestaurantsPage) Index(c *fiber.Ctx) error {
 	})
 }
 func (NewAddressPage) Index(c *fiber.Ctx) error {
-	alert := session.GetFlash(c)
-	s := session.New()
-	issuer, err := s.Get(c, secretKey)
+	user, err := helpers.UserValidation(c, secretKey)
 	if err != nil {
 		session.SetFlash(c, "Please Login!")
 		return c.Redirect("/")
 	}
 
-	uid, err := strconv.Atoi(issuer)
-	if err != nil {
-		session.SetFlash(c, "Please Login!")
-		return c.Redirect("/")
-	}
-	user, err := models.User{}.First(uid)
-	if err != nil {
-		session.SetFlash(c, "Please Login!")
-		return c.Redirect("/")
-	}
 	address, _ := models.Address{}.First(int(user.ID))
 
+	alert := session.GetFlash(c)
 	if user.Role == "Restaurant" {
 		return c.Render("restaurantnewaddresspage", fiber.Map{
 			"address": address,
@@ -168,24 +141,13 @@ func (NewAddressPage) Index(c *fiber.Ctx) error {
 
 }
 func (MyRestaurantPage) Index(c *fiber.Ctx) error {
-	alert := session.GetFlash(c)
-	s := session.New()
-	issuer, err := s.Get(c, secretKey)
-	if err != nil {
-		session.SetFlash(c, "No permission")
-		return c.Redirect("/")
-	}
-	//authorization operations
-	userid, err := strconv.Atoi(issuer)
-	if err != nil {
-		session.SetFlash(c, "Problem occured!")
-		return c.Redirect("/")
-	}
-	restaurant, err := models.User{}.First(userid)
+
+	restaurant, err := helpers.UserValidation(c, secretKey)
 	if err != nil {
 		session.SetFlash(c, "No such user!")
 		return c.Redirect("/")
 	}
+
 	if restaurant.Role != "Restaurant" {
 		session.SetFlash(c, "No Permission!")
 		return c.Redirect("/")
@@ -201,6 +163,7 @@ func (MyRestaurantPage) Index(c *fiber.Ctx) error {
 	//get all the products the restaurant has
 	products, _ := models.Product{}.Find(int(restaurant.ID))
 
+	alert := session.GetFlash(c)
 	return c.Render("restaurantmainpage", fiber.Map{
 		"user":     restaurant,
 		"products": products,
@@ -209,74 +172,51 @@ func (MyRestaurantPage) Index(c *fiber.Ctx) error {
 	})
 }
 func (NewProductPage) Index(c *fiber.Ctx) error {
-	alert := session.GetFlash(c)
-	s := session.New()
-	issuer, err := s.Get(c, secretKey)
-	if err != nil {
-		return c.Redirect("/")
-	}
-	userid, err := strconv.Atoi(issuer)
-	if err != nil {
-		session.SetFlash(c, "Problem Occuerd!")
-		return c.Redirect("/")
-	}
-	user, err := models.User{}.First(userid)
+
+	user, err := helpers.UserValidation(c, secretKey)
 	if err != nil {
 		session.SetFlash(c, "User not found!")
 		return c.Redirect("/")
 	}
+
 	if user.Role != "Restaurant" {
 		session.SetFlash(c, "No permission")
 		return c.Redirect("/")
 	}
 	//user is a valid restaurtan, there is no problem
-
+	alert := session.GetFlash(c)
 	return c.Render("newproductpage", fiber.Map{
 		"alert": alert,
 	})
 }
 func (EditProductPage) Index(c *fiber.Ctx) error {
-	alert := session.GetFlash(c)
-	s := session.New()
-	issuer, err := s.Get(c, secretKey)
-	if err != nil {
-		return c.Redirect("/")
-	}
-	userid, err := strconv.Atoi(issuer)
-	if err != nil {
-		session.SetFlash(c, "Problem Occuerd!")
-		return c.Redirect("/")
-	}
-	user, err := models.User{}.First(userid)
+
+	user, err := helpers.UserValidation(c, secretKey)
 	if err != nil {
 		session.SetFlash(c, "User not found!")
 		return c.Redirect("/")
 	}
+
 	if user.Role != "Restaurant" {
 		session.SetFlash(c, "No permission")
 		return c.Redirect("/")
 	}
 	//user is a valid restaurtan, there is no problem
 
-	productissuer := c.Params("data")
-	productid, err := strconv.Atoi(productissuer)
+	product, err := helpers.ProductValidation(c.Params("data"))
 	if err != nil {
-		session.SetFlash(c, "Problem Occured!")
+		session.SetFlash(c, "Product has not found!")
 		return c.Redirect("/myrestaurant")
 	}
 
-	product := models.Product{}.First(productid)
-	if product.ID == 0 {
-		session.SetFlash(c, "Couldn't find product!")
-		return c.Redirect("/myrestaurant")
-	}
-
-	//if the product owned by this restaurant.
+	//is the product owned by this restaurant?
 	if strconv.Itoa(int(user.ID)) != product.RestaurantID {
-		session.SetFlash(c, "Problem Occured!")
+		session.SetFlash(c, "Permission Error!")
 		return c.Redirect("/myrestaurant")
 	}
 
+	//if nothing wrong, render edit product page.
+	alert := session.GetFlash(c)
 	return c.Render("editproductpage", fiber.Map{
 		"alert":   alert,
 		"product": product,
@@ -284,41 +224,32 @@ func (EditProductPage) Index(c *fiber.Ctx) error {
 	})
 }
 func (RestaurantPage) Index(c *fiber.Ctx) error {
-	alert := session.GetFlash(c)
+
 	//User Validation process
-	s := session.New()
-	issuer, err := s.Get(c, secretKey)
+	user, err := helpers.UserValidation(c, secretKey)
 	if err != nil {
 		session.SetFlash(c, "Please Login!")
 		return c.Redirect("/")
 	}
 
-	uid, err := strconv.Atoi(issuer)
-	if err != nil {
-		session.SetFlash(c, "Please Login!")
-		return c.Redirect("/")
-	}
-	user, err := models.User{}.First(uid)
-	if err != nil {
-		session.SetFlash(c, "Please Login!")
-		return c.Redirect("/")
-	}
 	if user.Role != "User" {
 		session.SetFlash(c, "No permission!")
 		return c.Redirect("/")
 	}
+
 	//user is a valid User, there is no problem.
 
 	restaurantname := c.Params("data")
 	restaurant, err := models.User{}.FirstRestaurantWithSlug(restaurantname)
 
 	if err != nil {
-		session.SetFlash(c, "Restaurant not found!")
+		session.SetFlash(c, "Restaurant's not found!")
 		return c.Redirect("/restaurants")
 	}
 	address, _ := models.Address{}.First(int(restaurant.ID))
 	products, _ := models.Product{}.Find(int(restaurant.ID))
 
+	alert := session.GetFlash(c)
 	return c.Render("restaurantcontentpage", fiber.Map{
 		"alert":      alert,
 		"restaurant": restaurant,
@@ -330,23 +261,12 @@ func (RestaurantPage) Index(c *fiber.Ctx) error {
 func (ProductDetailPage) Index(c *fiber.Ctx) error {
 	alert := session.GetFlash(c)
 	//User Validation process
-	s := session.New()
-	issuer, err := s.Get(c, secretKey)
+	user, err := helpers.UserValidation(c, secretKey)
 	if err != nil {
 		session.SetFlash(c, "Please Login!")
 		return c.Redirect("/")
 	}
 
-	uid, err := strconv.Atoi(issuer)
-	if err != nil {
-		session.SetFlash(c, "Please Login!")
-		return c.Redirect("/")
-	}
-	user, err := models.User{}.First(uid)
-	if err != nil {
-		session.SetFlash(c, "Please Login!")
-		return c.Redirect("/")
-	}
 	if user.Role != "User" {
 		session.SetFlash(c, "No permission!")
 		return c.Redirect("/")

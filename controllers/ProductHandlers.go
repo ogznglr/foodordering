@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"food/helpers"
 	"food/models"
 	"strconv"
 
@@ -11,21 +12,12 @@ import (
 )
 
 func NewProduct(c *fiber.Ctx) error {
-	s := session.New()
-	issuer, err := s.Get(c, secretKey)
-	if err != nil {
-		return c.Redirect("/")
-	}
-	userid, err := strconv.Atoi(issuer)
-	if err != nil {
-		session.SetFlash(c, "Problem Occuerd!")
-		return c.Redirect("/")
-	}
-	user, err := models.User{}.First(userid)
+	user, err := helpers.UserValidation(c, secretKey)
 	if err != nil {
 		session.SetFlash(c, "User not found!")
 		return c.Redirect("/")
 	}
+
 	if user.Role != "Restaurant" {
 		session.SetFlash(c, "No permission")
 		return c.Redirect("/")
@@ -67,21 +59,12 @@ func NewProduct(c *fiber.Ctx) error {
 }
 
 func DeleteProduct(c *fiber.Ctx) error {
-	s := session.New()
-	issuer, err := s.Get(c, secretKey)
-	if err != nil {
-		return c.Redirect("/")
-	}
-	userid, err := strconv.Atoi(issuer)
-	if err != nil {
-		session.SetFlash(c, "Problem Occuerd!")
-		return c.Redirect("/")
-	}
-	user, err := models.User{}.First(userid)
+	user, err := helpers.UserValidation(c, secretKey)
 	if err != nil {
 		session.SetFlash(c, "User not found!")
 		return c.Redirect("/")
 	}
+
 	if user.Role != "Restaurant" {
 		session.SetFlash(c, "No permission")
 		return c.Redirect("/")
@@ -111,21 +94,12 @@ func DeleteProduct(c *fiber.Ctx) error {
 }
 
 func EditProduct(c *fiber.Ctx) error {
-	s := session.New()
-	issuer, err := s.Get(c, secretKey)
-	if err != nil {
-		return c.Redirect("/")
-	}
-	userid, err := strconv.Atoi(issuer)
-	if err != nil {
-		session.SetFlash(c, "Problem Occuerd!")
-		return c.Redirect("/")
-	}
-	user, err := models.User{}.First(userid)
+	user, err := helpers.UserValidation(c, secretKey)
 	if err != nil {
 		session.SetFlash(c, "User not found!")
 		return c.Redirect("/")
 	}
+
 	if user.Role != "Restaurant" {
 		session.SetFlash(c, "No permission")
 		return c.Redirect("/")
