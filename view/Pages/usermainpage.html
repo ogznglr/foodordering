@@ -34,11 +34,11 @@
                         {{range $index,$value := .restaurants}}
                           <tr>
                             <div>
-                                <td><img src="{{$value.restaurant.PictureURL}}" height="100px" width="100px" alt=""></td>
-                                <td><a href="/restaurant/{{$value.restaurant.Slug}}">{{$value.restaurant.FirstName}}</button>    
+                                <td><img src="{{$value.Restaurant.PictureURL}}" height="100px" width="100px" alt=""></td>
+                                <td><a href="/restaurant/{{$value.Restaurant.Slug}}">{{$value.Restaurant.FirstName}}</button>    
                                 </td>
-                                <td>{{$value.address.District}} - {{$value.address.Neighbourhood}}</td>
-                                <td>{{$value.distance}} M</td>
+                                <td>{{$value.Address.District}} - {{$value.Address.Neighbourhood}}</td>
+                                <td>{{$value.Distance}} KM</td>
                             </div>
                             </tr>
                         {{end}}

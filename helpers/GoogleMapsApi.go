@@ -3,6 +3,7 @@ package helpers
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"food/models"
 	"io/ioutil"
@@ -19,8 +20,8 @@ type DistanceMatrix struct {
 	Rows                  []struct {
 		Elements []struct {
 			Distance struct {
-				Text  string `json:"text"`
-				Value int    `json:"value"`
+				Text  string  `json:"text"`
+				Value float64 `json:"value"`
 			} `json:"distance"`
 			Duration struct {
 				Text  string `json:"text"`
@@ -50,29 +51,32 @@ func GetCoordinates(address *models.Address) (float64, float64, error) {
 	return lat, lng, nil
 }
 
-func GetDistance(uaddress models.Address, raddress models.Address) (int, error) {
+func GetDistance(uaddress models.Address, raddress models.Address) (float64, error) {
 	url := fmt.Sprintf("https://maps.googleapis.com/maps/api/distancematrix/json?origins=%f,%f&destinations=%f,%f&key=%s", raddress.Lat, raddress.Lng, uaddress.Lat, uaddress.Lng, ApiKey)
 	method := "GET"
 
 	client := &http.Client{}
 	req, err := http.NewRequest(method, url, nil)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("request is wrong ", err)
 		return 0, err
 	}
 	res, err := client.Do(req)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("response couldn't reveive ", err)
 		return 0, err
 	}
 	defer res.Body.Close() //close the response body after this function dies.
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("response can not be readed ", err)
 		return 0, err
 	}
 	var results DistanceMatrix
-	json.Unmarshal(body, &results)
+	err = json.Unmarshal(body, &results)
+	if err != nil || results.Status != "OK" {
+		return 0, errors.New("Request is rejected!")
+	}
 	return results.Rows[0].Elements[0].Distance.Value, nil
 }

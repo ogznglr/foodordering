@@ -14,7 +14,7 @@ import (
 func NewProduct(c *fiber.Ctx) error {
 	user, err := helpers.UserValidation(c, secretKey)
 	if err != nil {
-		session.SetFlash(c, "User not found!")
+		session.SetFlash(c, "User's not found!")
 		return c.Redirect("/")
 	}
 

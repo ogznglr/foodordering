@@ -56,61 +56,52 @@ func (NewRestaurantPage) Index(c *fiber.Ctx) error {
 	})
 }
 func (RestaurantsPage) Index(c *fiber.Ctx) error {
-	alert := session.GetFlash(c)
-	s := session.New()
-	issuer, err := s.Get(c, secretKey)
+	user, err := helpers.UserValidation(c, secretKey)
 	if err != nil {
 		session.SetFlash(c, "Please Login!")
 		return c.Redirect("/")
 	}
 
-	uid, err := strconv.Atoi(issuer)
-	if err != nil {
-		session.SetFlash(c, "Please Login!")
-		return c.Redirect("/")
-	}
-	user, err := models.User{}.First(uid)
-	if err != nil {
-		session.SetFlash(c, "Please Login!")
-		return c.Redirect("/")
-	}
 	if user.Role != "User" {
 		session.SetFlash(c, "You have no permission!")
 		return c.Redirect("/")
 	}
 	//Does user have a valid address
-	_, err = models.Address{}.First(int(user.ID))
+	useraddress, err := models.Address{}.First(int(user.ID))
 	if err != nil {
 		session.SetFlash(c, "Please enter a valid address")
-		c.Redirect("/newaddress")
+		return c.Redirect("/newaddress")
 	}
-	useraddress, err := models.Address{}.First(int(user.ID))
-
-	if err != nil {
-		c.Redirect("/newaddress")
-	}
+	//Get the restaurants from your city.
 	restaurants := models.User{}.FindRestaurants(useraddress.City)
 	if restaurants == nil {
 		session.SetFlash(c, "There is no any restaurant close to you!")
 		return c.Redirect("/newaddress")
 	}
 
-	restaurants_struct := []fiber.Map{}
+	restaurants_slice := []models.Response_restaurants{}
 
 	for _, element := range restaurants {
 		restaddress, _ := models.Address{}.First(int(element.ID))
-		dist, _ := helpers.GetDistance(useraddress, restaddress)
+		dist, err := helpers.GetDistance(useraddress, restaddress)
+		dist = dist / 1000
+		if err != nil {
+			continue
+		}
 
-		restaurants_struct = append(restaurants_struct, fiber.Map{
-			"restaurant": element,
-			"address":    restaddress,
-			"distance":   dist,
+		restaurants_slice = append(restaurants_slice, models.Response_restaurants{
+			Restaurant: element,
+			Address:    restaddress,
+			Distance:   dist,
 		})
-
 	}
 
+	//This function sorts the restaurants from lowest distance to highest.
+	restaurants_slice = helpers.QuickSort(restaurants_slice, 0, len(restaurants_slice))
+
+	alert := session.GetFlash(c)
 	return c.Render("usermainpage", fiber.Map{
-		"restaurants": restaurants_struct,
+		"restaurants": restaurants_slice,
 		"user":        user,
 		"alert":       alert,
 	})
@@ -138,7 +129,6 @@ func (NewAddressPage) Index(c *fiber.Ctx) error {
 			"alert":   alert,
 		})
 	}
-
 }
 func (MyRestaurantPage) Index(c *fiber.Ctx) error {
 
@@ -259,7 +249,6 @@ func (RestaurantPage) Index(c *fiber.Ctx) error {
 	})
 }
 func (ProductDetailPage) Index(c *fiber.Ctx) error {
-	alert := session.GetFlash(c)
 	//User Validation process
 	user, err := helpers.UserValidation(c, secretKey)
 	if err != nil {
@@ -284,14 +273,16 @@ func (ProductDetailPage) Index(c *fiber.Ctx) error {
 
 	distance, _ := helpers.GetDistance(restaurantAddress, userAddress)
 
-	if distance >= 5000 {
+	if distance >= 10000 {
 		session.SetFlash(c, "The distance is too much. Please select another restaurant!")
 		return c.Redirect("/restaurants")
 	}
 
+	alert := session.GetFlash(c)
 	return c.Render("productdetailpage", fiber.Map{
 		"restaurant": restaurant,
 		"product":    product,
 		"alert":      alert,
+		"user":       user,
 	})
 }

@@ -37,8 +37,13 @@
                         <div class="col-lg-5 d-flex justify-content-center">
                             <div class="counter">
                                 <button id="btn-minus" type="submit" class="btn btn-outline-primary"><i class="fa fa-minus"></i></button>
-                                <span>1</span>
+                                <span id="product_amount">10</span>
                                 <button id="btn-plus" type="submit" class="btn btn-outline-primary"><i class="fa fa-plus"></i></button>
+                            </div>
+                        </div>
+                        <div class="col-lg-5 d-flex justify-content-center">
+                            <div class="add-basket">
+                                <button id="btn-minus" type="submit" class="btn btn-outline-primary"><i class="fa fa-minus"></i></button>
                             </div>
                         </div>
                     </div>
@@ -89,9 +94,19 @@
         </div>
     </div>
     <script>
+        const amount = document.getElementById('product_amount');
+
         document.getElementById("btn-minus").addEventListener("click",function(){
-            
-        })
+            if(amount.textContent > 1){
+                amount.textContent = amount.textContent -1;
+            }
+        });
+
+        document.getElementById("btn-plus").addEventListener("click",function(){
+            if(amount.textContent < 20){
+                amount.textContent = parseInt(amount.textContent) + 1;
+            }
+        });
     </script>
 
     {{template "scripts"}}

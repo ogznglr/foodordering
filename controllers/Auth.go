@@ -130,3 +130,43 @@ func Logout(c *fiber.Ctx) error {
 	session.SetFlash(c, "Loged out Successfully")
 	return c.Redirect("/")
 }
+func NewAddress(c *fiber.Ctx) error {
+	userid, err := helpers.IssuerToId(c, secretKey)
+	if err != nil {
+		session.SetFlash(c, "A problem occured!")
+		c.Redirect("/newaddress")
+	}
+
+	currentaddr, err := models.Address{}.First(userid)
+	//if there is an address, delete it first
+	if err == nil {
+		currentaddr.Delete()
+	}
+
+	address := &models.Address{
+		UserID:        userid,
+		District:      c.FormValue("district"),
+		City:          c.FormValue("city"),
+		Neighbourhood: c.FormValue("neighbourhood"),
+		BuildingNo:    c.FormValue("buildingno"),
+		Street:        c.FormValue("street"),
+		DoorNo:        c.FormValue("doorno"),
+	}
+	lat, lng, err := helpers.GetCoordinates(address)
+
+	if err != nil {
+		return err
+	}
+
+	address.Lat = lat
+	address.Lng = lng
+
+	address.New()
+
+	//Updates user's city
+	user, _ := models.User{}.First(userid)
+	user.UpdateCity(address.City)
+
+	session.SetFlash(c, "Address has been added successfully!")
+	return c.Redirect("/newaddress")
+}
