@@ -2,32 +2,37 @@ package routes
 
 import (
 	"food/controllers"
+	"food/controllers/middlewares"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 func Listen(app *fiber.App) {
+	//un-auth Gets
 	app.Get("/", controllers.MainPage{}.Index)
 	app.Get("/newrestaurant", controllers.NewRestaurantPage{}.Index)
-	app.Get("/restaurants", controllers.RestaurantsPage{}.Index)
-	app.Get("/newaddress", controllers.NewAddressPage{}.Index)
-	app.Get("/myrestaurant", controllers.MyRestaurantPage{}.Index)
-	app.Get("/newproduct", controllers.NewProductPage{}.Index)
 	app.Get("/logout", controllers.Logout)
-	app.Get("/product/edit/:data", controllers.EditProductPage{}.Index)
-	app.Get("/restaurant/:data", controllers.RestaurantPage{}.Index)
-	app.Get("/restaurant/:restaurant/:product", controllers.ProductDetailPage{}.Index)
 
-	app.Get("/product/delete/:data", controllers.DeleteProduct)
+	//auth Gets
+	app.Get("/restaurants", middlewares.AuthMiddleware, controllers.RestaurantsPage{}.Index)
+	app.Get("/newaddress", middlewares.AuthMiddleware, controllers.NewAddressPage{}.Index)
+	app.Get("/myrestaurant", middlewares.AuthMiddleware, controllers.MyRestaurantPage{}.Index)
+	app.Get("/newproduct", middlewares.AuthMiddleware, controllers.NewProductPage{}.Index)
+	app.Get("/product/edit/:data", middlewares.AuthMiddleware, controllers.EditProductPage{}.Index)
+	app.Get("/restaurant/:data", middlewares.AuthMiddleware, controllers.RestaurantPage{}.Index)
+	app.Get("/restaurant/:restaurant/:product", middlewares.AuthMiddleware, controllers.ProductDetailPage{}.Index)
+	app.Get("/product/delete/:data", middlewares.AuthMiddleware, controllers.DeleteProduct)
 
-	//post requests
+	//un-auth Posts
+	app.Post("/login", controllers.Login)
 	app.Post("/newuser", controllers.NewUser)
 	app.Post("/newrestaurant", controllers.NewRestaurant)
-	app.Post("/login", controllers.Login)
-	app.Post("/newaddress", controllers.NewAddress)
-	app.Post("/newproduct", controllers.NewProduct)
-	app.Post("/newprofilepicture", controllers.NewProfilePicture)
-	app.Post("/product/edit", controllers.EditProduct)
+
+	//auth Posts
+	app.Post("/newaddress", middlewares.AuthMiddleware, controllers.NewAddress)
+	app.Post("/newproduct", middlewares.AuthMiddleware, controllers.NewProduct)
+	app.Post("/newprofilepicture", middlewares.AuthMiddleware, controllers.NewProfilePicture)
+	app.Post("/product/edit", middlewares.AuthMiddleware, controllers.EditProduct)
 
 	app.Static("/assets/", "./view/assets/")
 	app.Static("/uploads/", "./uploads/")

@@ -131,20 +131,16 @@ func Logout(c *fiber.Ctx) error {
 	return c.Redirect("/")
 }
 func NewAddress(c *fiber.Ctx) error {
-	userid, err := helpers.IssuerToId(c, secretKey)
-	if err != nil {
-		session.SetFlash(c, "A problem occured!")
-		c.Redirect("/newaddress")
-	}
+	user := c.Locals("user").(models.User)
 
-	currentaddr, err := models.Address{}.First(userid)
+	currentaddr, err := models.Address{}.First(int(user.ID))
 	//if there is an address, delete it first
 	if err == nil {
 		currentaddr.Delete()
 	}
 
 	address := &models.Address{
-		UserID:        userid,
+		UserID:        int(user.ID),
 		District:      c.FormValue("district"),
 		City:          c.FormValue("city"),
 		Neighbourhood: c.FormValue("neighbourhood"),
@@ -164,7 +160,6 @@ func NewAddress(c *fiber.Ctx) error {
 	address.New()
 
 	//Updates user's city
-	user, _ := models.User{}.First(userid)
 	user.UpdateCity(address.City)
 
 	session.SetFlash(c, "Address has been added successfully!")

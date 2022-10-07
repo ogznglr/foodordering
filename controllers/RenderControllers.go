@@ -29,9 +29,15 @@ type ProductDetailPage struct {
 }
 
 func (MainPage) Index(c *fiber.Ctx) error {
-
 	user, err := helpers.UserValidation(c, secretKey)
 	if err != nil {
+		alert := session.GetFlash(c)
+		return c.Render("mainpage", fiber.Map{
+			"alert": alert,
+		})
+	}
+
+	if user.ID == 0 {
 		alert := session.GetFlash(c)
 		return c.Render("mainpage", fiber.Map{
 			"alert": alert,
@@ -56,11 +62,7 @@ func (NewRestaurantPage) Index(c *fiber.Ctx) error {
 	})
 }
 func (RestaurantsPage) Index(c *fiber.Ctx) error {
-	user, err := helpers.UserValidation(c, secretKey)
-	if err != nil {
-		session.SetFlash(c, "Please Login!")
-		return c.Redirect("/")
-	}
+	user := c.Locals("user").(models.User)
 
 	if user.Role != "User" {
 		session.SetFlash(c, "You have no permission!")
@@ -107,11 +109,7 @@ func (RestaurantsPage) Index(c *fiber.Ctx) error {
 	})
 }
 func (NewAddressPage) Index(c *fiber.Ctx) error {
-	user, err := helpers.UserValidation(c, secretKey)
-	if err != nil {
-		session.SetFlash(c, "Please Login!")
-		return c.Redirect("/")
-	}
+	user := c.Locals("user").(models.User)
 
 	address, _ := models.Address{}.First(int(user.ID))
 
@@ -132,11 +130,7 @@ func (NewAddressPage) Index(c *fiber.Ctx) error {
 }
 func (MyRestaurantPage) Index(c *fiber.Ctx) error {
 
-	restaurant, err := helpers.UserValidation(c, secretKey)
-	if err != nil {
-		session.SetFlash(c, "No such user!")
-		return c.Redirect("/")
-	}
+	restaurant := c.Locals("user").(models.User)
 
 	if restaurant.Role != "Restaurant" {
 		session.SetFlash(c, "No Permission!")
@@ -163,11 +157,7 @@ func (MyRestaurantPage) Index(c *fiber.Ctx) error {
 }
 func (NewProductPage) Index(c *fiber.Ctx) error {
 
-	user, err := helpers.UserValidation(c, secretKey)
-	if err != nil {
-		session.SetFlash(c, "User not found!")
-		return c.Redirect("/")
-	}
+	user := c.Locals("user").(models.User)
 
 	if user.Role != "Restaurant" {
 		session.SetFlash(c, "No permission")
@@ -181,11 +171,7 @@ func (NewProductPage) Index(c *fiber.Ctx) error {
 }
 func (EditProductPage) Index(c *fiber.Ctx) error {
 
-	user, err := helpers.UserValidation(c, secretKey)
-	if err != nil {
-		session.SetFlash(c, "User not found!")
-		return c.Redirect("/")
-	}
+	user := c.Locals("user").(models.User)
 
 	if user.Role != "Restaurant" {
 		session.SetFlash(c, "No permission")
@@ -215,12 +201,7 @@ func (EditProductPage) Index(c *fiber.Ctx) error {
 }
 func (RestaurantPage) Index(c *fiber.Ctx) error {
 
-	//User Validation process
-	user, err := helpers.UserValidation(c, secretKey)
-	if err != nil {
-		session.SetFlash(c, "Please Login!")
-		return c.Redirect("/")
-	}
+	user := c.Locals("user").(models.User)
 
 	if user.Role != "User" {
 		session.SetFlash(c, "No permission!")
@@ -249,12 +230,7 @@ func (RestaurantPage) Index(c *fiber.Ctx) error {
 	})
 }
 func (ProductDetailPage) Index(c *fiber.Ctx) error {
-	//User Validation process
-	user, err := helpers.UserValidation(c, secretKey)
-	if err != nil {
-		session.SetFlash(c, "Please Login!")
-		return c.Redirect("/")
-	}
+	user := c.Locals("user").(models.User)
 
 	if user.Role != "User" {
 		session.SetFlash(c, "No permission!")

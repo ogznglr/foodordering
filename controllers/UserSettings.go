@@ -2,18 +2,14 @@ package controllers
 
 import (
 	"fmt"
-	"food/helpers"
+	"food/models"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/ogznglr/session"
 )
 
 func NewProfilePicture(c *fiber.Ctx) error {
-	user, err := helpers.UserValidation(c, secretKey)
-	if err != nil {
-		session.SetFlash(c, "User not found!")
-		return c.Redirect("/")
-	}
+	user := c.Locals("user").(models.User)
 
 	if user.Role != "Restaurant" {
 		session.SetFlash(c, "No permission")

@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"fmt"
-	"food/helpers"
 	"food/models"
 	"strconv"
 
@@ -12,11 +11,7 @@ import (
 )
 
 func NewProduct(c *fiber.Ctx) error {
-	user, err := helpers.UserValidation(c, secretKey)
-	if err != nil {
-		session.SetFlash(c, "User's not found!")
-		return c.Redirect("/")
-	}
+	user := c.Locals("user").(models.User)
 
 	if user.Role != "Restaurant" {
 		session.SetFlash(c, "No permission")
@@ -59,11 +54,7 @@ func NewProduct(c *fiber.Ctx) error {
 }
 
 func DeleteProduct(c *fiber.Ctx) error {
-	user, err := helpers.UserValidation(c, secretKey)
-	if err != nil {
-		session.SetFlash(c, "User not found!")
-		return c.Redirect("/")
-	}
+	user := c.Locals("user").(models.User)
 
 	if user.Role != "Restaurant" {
 		session.SetFlash(c, "No permission")
@@ -94,11 +85,7 @@ func DeleteProduct(c *fiber.Ctx) error {
 }
 
 func EditProduct(c *fiber.Ctx) error {
-	user, err := helpers.UserValidation(c, secretKey)
-	if err != nil {
-		session.SetFlash(c, "User not found!")
-		return c.Redirect("/")
-	}
+	user := c.Locals("user").(models.User)
 
 	if user.Role != "Restaurant" {
 		session.SetFlash(c, "No permission")
