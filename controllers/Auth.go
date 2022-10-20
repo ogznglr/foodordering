@@ -17,6 +17,8 @@ const secretKey = "SecretKey"
 
 const cost = 10
 
+const defaultpicurl = "/uploads/default.png"
+
 func NewUser(c *fiber.Ctx) error {
 	fn := c.FormValue("firstname")
 	ln := c.FormValue("lastname")
@@ -88,11 +90,12 @@ func NewRestaurant(c *fiber.Ctx) error {
 	pw = string(password)
 
 	db = database.DB.Create(&models.User{
-		FirstName: nm,
-		Email:     email,
-		Password:  pw,
-		Role:      "Restaurant",
-		Slug:      slug.Make(nm),
+		FirstName:  nm,
+		Email:      email,
+		Password:   pw,
+		Role:       "Restaurant",
+		Slug:       slug.Make(nm),
+		PictureURL: defaultpicurl,
 	})
 	if db.Error != nil {
 		fmt.Println(err)

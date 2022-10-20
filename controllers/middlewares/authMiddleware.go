@@ -11,7 +11,13 @@ import (
 var secretKey = "SecretKey"
 
 func AuthMiddleware(c *fiber.Ctx) error {
-	uid, err := IssuerMiddleware(c, secretKey)
+	s := session.New()
+	issuer, err := s.Get(c, secretKey)
+	if err != nil {
+		return err
+	}
+
+	uid, err := strconv.Atoi(issuer)
 	if err != nil {
 		return err
 	}
@@ -24,19 +30,4 @@ func AuthMiddleware(c *fiber.Ctx) error {
 	c.Locals("user", user)
 
 	return c.Next()
-}
-
-func IssuerMiddleware(c *fiber.Ctx, secretKey string) (int, error) {
-	s := session.New()
-	issuer, err := s.Get(c, secretKey)
-	if err != nil {
-		return 0, err
-	}
-
-	uid, err := strconv.Atoi(issuer)
-	if err != nil {
-		return 0, err
-	}
-	//user id from access token is converted to integer successfully.
-	return uid, nil
 }

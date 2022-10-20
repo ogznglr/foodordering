@@ -22,6 +22,7 @@ func Listen(app *fiber.App) {
 	app.Get("/restaurant/:data", middlewares.AuthMiddleware, controllers.RestaurantPage{}.Index)
 	app.Get("/restaurant/:restaurant/:product", middlewares.AuthMiddleware, controllers.ProductDetailPage{}.Index)
 	app.Get("/product/delete/:data", middlewares.AuthMiddleware, controllers.DeleteProduct)
+	app.Get("/cart", middlewares.AuthMiddleware, controllers.CartPage{}.Index)
 
 	//un-auth Posts
 	app.Post("/login", controllers.Login)
@@ -33,6 +34,7 @@ func Listen(app *fiber.App) {
 	app.Post("/newproduct", middlewares.AuthMiddleware, controllers.NewProduct)
 	app.Post("/newprofilepicture", middlewares.AuthMiddleware, controllers.NewProfilePicture)
 	app.Post("/product/edit", middlewares.AuthMiddleware, controllers.EditProduct)
+	app.Post("/addtocart", middlewares.AuthMiddleware, controllers.Addtocart)
 
 	app.Static("/assets/", "./view/assets/")
 	app.Static("/uploads/", "./uploads/")

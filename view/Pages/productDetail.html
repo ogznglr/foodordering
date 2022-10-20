@@ -27,23 +27,35 @@
                             <img src="{{.product.PictureURL}}" alt="">
                         </div>
                     </div>
-                    <div class="row justify-content-center">
-                        <div class="col-lg-5 d-flex justify-content-center">
+                    <div class="row justify-content-center counter">
+                        <div class="col-lg-3 d-flex justify-content-center">
                             <div class="restaurant-name">
                                 <h2>{{.product.Name}}</h2>
-                                <h2>{{.product.Price}} TRY</h2>
+                                <h2><span id="price">{{.product.Price}}</span> TRY</h2>
                             </div>
                         </div>
-                        <div class="col-lg-5 d-flex justify-content-center">
-                            <div class="counter">
+                        <div class="col-lg-3 d-flex justify-content-center">
+                            <div class="">
                                 <button id="btn-minus" type="submit" class="btn btn-outline-primary"><i class="fa fa-minus"></i></button>
-                                <span id="product_amount">10</span>
+                                <span id="product_amount">1</span>
                                 <button id="btn-plus" type="submit" class="btn btn-outline-primary"><i class="fa fa-plus"></i></button>
                             </div>
                         </div>
-                        <div class="col-lg-5 d-flex justify-content-center">
+                        <div class="col-lg-3 d-flex justify-content-center">
                             <div class="add-basket">
-                                <button id="btn-minus" type="submit" class="btn btn-outline-primary"><i class="fa fa-minus"></i></button>
+                                <form action="/addtocart" method="post">
+                                    <input hidden type="number" name="piece-number" id="piece-number" value="1">
+                                    <input hidden type="text" name="restaurant-name" id="restaurant-name" value="{{.restaurant.Slug}}">
+                                    <input hidden type="text" name="product-name" id="product-name" value="{{.product.Slug}}">
+                                    
+
+                                    <button class="addtocart" id="addtocart">
+                                        <div class="pretext">
+                                          <i class="fas fa-cart-plus"></i> ADD TO CART
+                                        </div>
+                                      </button>
+                                </form>
+                                
                             </div>
                         </div>
                     </div>
@@ -95,20 +107,26 @@
     </div>
     <script>
         const amount = document.getElementById('product_amount');
+        const price_element = document.getElementById('price');
+        const price = price_element.textContent;
+        const pice_number = document.getElementById('piece-number')
 
         document.getElementById("btn-minus").addEventListener("click",function(){
             if(amount.textContent > 1){
                 amount.textContent = amount.textContent -1;
+                price_element.textContent = price * amount.textContent;
+                pice_number.setAttribute('value', amount.textContent);
             }
         });
 
         document.getElementById("btn-plus").addEventListener("click",function(){
             if(amount.textContent < 20){
                 amount.textContent = parseInt(amount.textContent) + 1;
+                price_element.textContent = price * amount.textContent;
+                pice_number.setAttribute('value', amount.textContent);
             }
         });
     </script>
-
     {{template "scripts"}}
     {{template "alert" .alert}}
 </body>

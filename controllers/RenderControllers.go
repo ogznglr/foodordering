@@ -4,6 +4,7 @@ import (
 	"food/helpers"
 	"food/models"
 	"strconv"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/ogznglr/session"
@@ -26,6 +27,8 @@ type EditProductPage struct {
 type RestaurantPage struct {
 }
 type ProductDetailPage struct {
+}
+type CartPage struct {
 }
 
 func (MainPage) Index(c *fiber.Ctx) error {
@@ -261,4 +264,18 @@ func (ProductDetailPage) Index(c *fiber.Ctx) error {
 		"alert":      alert,
 		"user":       user,
 	})
+}
+func (CartPage) Index(c *fiber.Ctx) error {
+	// user := c.Locals("user")
+	cart, err := helpers.GetCart(c)
+
+	if err != nil {
+		session.SetFlash(c, "Unvalid cart!")
+		c.Cookie(&fiber.Cookie{
+			Name:    "cart-session",
+			Expires: time.Now().Add(-10 * time.Hour),
+		})
+	}
+
+	return c.JSON(cart)
 }

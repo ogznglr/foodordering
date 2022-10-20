@@ -5,3 +5,8 @@ type Response_restaurants struct {
 	Address    Address
 	Distance   float64
 }
+
+type Response_cart struct {
+	ProductName string
+	Entity      int
+}
