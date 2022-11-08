@@ -7,6 +7,8 @@ type Response_restaurants struct {
 }
 
 type Response_cart struct {
-	ProductName string
-	Entity      int
+	ID      string
+	Product Product
+	Entity  int
+	Price   string
 }

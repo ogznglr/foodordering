@@ -266,16 +266,31 @@ func (ProductDetailPage) Index(c *fiber.Ctx) error {
 	})
 }
 func (CartPage) Index(c *fiber.Ctx) error {
-	// user := c.Locals("user")
-	cart, err := helpers.GetCart(c)
+	alert := session.GetFlash(c)
+	user := c.Locals("user").(models.User)
+	cart, _, err := helpers.CartToModels(c)
+
+	//if the user's role is okay for adding cart
+	if user.Role != "User" {
+		c.Cookie(&fiber.Cookie{
+			Name:    "cart-session",
+			Expires: time.Now().Add(-10 * time.Hour),
+		})
+
+		session.SetFlash(c, "Unauthorized")
+		return c.Redirect("/")
+	}
 
 	if err != nil {
-		session.SetFlash(c, "Unvalid cart!")
 		c.Cookie(&fiber.Cookie{
 			Name:    "cart-session",
 			Expires: time.Now().Add(-10 * time.Hour),
 		})
 	}
 
-	return c.JSON(cart)
+	return c.Render("cartpage", fiber.Map{
+		"cart":  cart,
+		"user":  user,
+		"alert": alert,
+	})
 }

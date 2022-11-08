@@ -23,6 +23,7 @@ func Listen(app *fiber.App) {
 	app.Get("/restaurant/:restaurant/:product", middlewares.AuthMiddleware, controllers.ProductDetailPage{}.Index)
 	app.Get("/product/delete/:data", middlewares.AuthMiddleware, controllers.DeleteProduct)
 	app.Get("/cart", middlewares.AuthMiddleware, controllers.CartPage{}.Index)
+	app.Get("/cart/delete/:data", middlewares.AuthMiddleware, controllers.DeleteFromCart)
 
 	//un-auth Posts
 	app.Post("/login", controllers.Login)
