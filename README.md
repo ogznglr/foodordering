@@ -12,3 +12,13 @@ Project Pictures:
 <img src="https://i.ibb.co/tYqMFx2/restaurant-details.png"/>
 
 <img src="https://i.ibb.co/TrkppG4/restaurants-page.png"/>
+
+<img src="https://i.ibb.co/p1sYd4X/restaurant.png"/>
+
+<img src="https://i.ibb.co/zF19Tsn/add-to-cart.png"/>
+
+<img src="https://i.ibb.co/b2s6YJg/basket.png"/>
+
+<img src="https://i.ibb.co/wBMQt3G/order-successfully.png"/>
+
+<img src="https://i.ibb.co/9WXXk5R/orders-page.png"/>
